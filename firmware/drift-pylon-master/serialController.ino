@@ -100,21 +100,22 @@ void serialController(String incomingByte) {
     String json_string;
     serializeJson(doc, json_string);
     Serial.println(json_string);
-    
-  }else if (action == "file_transfer_start")
-  {
-    int fileSize = input["fileSize"];
-    if (Serial.available())
-    {
-      for (int i = 0; i <= fileSize; i++)
-      {
-        fileTransfer = Serial.read();
-      }
-    }
-    Serial.print("File Size: ");
-    Serial.print(fileTransfer);
-    Serial.println(". . .");
   }
+    
+//  }else if (action == "file_transfer_start")
+//  {
+//    int fileSize = input["fileSize"];
+//    if (Serial.available())
+//    {
+//      for (int i = 0; i <= fileSize; i++)
+//      {
+//        //fileTransfer = Serial.read();
+//      }
+//    }
+//    Serial.print("File Size: ");
+//    Serial.print(fileTransfer);
+//    Serial.println(". . .");
+//  }
 }
 
 void sendSerialNodeNotification() {

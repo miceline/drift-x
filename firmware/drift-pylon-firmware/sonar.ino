@@ -93,13 +93,14 @@ void sonar()
         doc["avg"] = avg;
         doc["score"] = score;
         doc["sampleSize"] = sampleSize;
-        doc["name"] = NODE_ID;
+        //doc["name"] = NODE_ID;
         doc["nodeId"] = mesh.getNodeId();
-        doc["freeMem"] = String(ESP.getFreeHeap());
+        //doc["freeMem"] = String(ESP.getFreeHeap());
 
         String json_string;
         serializeJson(doc, json_string);
         mesh.sendBroadcast(json_string);
+        //Serial.println(json_string);
         //pp.Clear();
       }
     }

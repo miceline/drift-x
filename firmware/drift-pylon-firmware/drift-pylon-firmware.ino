@@ -174,7 +174,7 @@ void receivedCallback( uint32_t from, String &msg ) {
     doc["msg"] = "Hello from " + NODE_ID + " mesh id: " + mesh.getNodeId();
     doc["timeZone"] = tzname[0];
     doc["time"] = asctime(timeinfo);
-    doc["name"] = NODE_ID;
+    //doc["name"] = NODE_ID;
     doc["nodeId"] = mesh.getNodeId();
     doc["freeMem"] = String(ESP.getFreeHeap());
 
@@ -196,7 +196,7 @@ void receivedCallback( uint32_t from, String &msg ) {
     doc["time"] = asctime(timeinfo);
     doc["version"] = SKETCH_VERSION;
     doc["compileData"] = compile_date_file;
-    doc["name"] = NODE_ID;
+    //doc["name"] = NODE_ID;
     doc["nodeId"] = mesh.getNodeId();
 
     String json_string;
@@ -208,7 +208,7 @@ void receivedCallback( uint32_t from, String &msg ) {
     systemArmId = input["systemArmId"];
     StaticJsonDocument<200> doc;
     doc["systemArm"] = true;
-    doc["name"] = NODE_ID;
+    //doc["name"] = NODE_ID;
     doc["nodeId"] = mesh.getNodeId();
     doc["msgType"] = "arm_system_ack";
 
@@ -222,7 +222,7 @@ void receivedCallback( uint32_t from, String &msg ) {
     systemArmId = 0;
     StaticJsonDocument<200> doc;
     doc["systemArm"] = false;
-    doc["name"] = NODE_ID;
+    //doc["name"] = NODE_ID;
     doc["nodeId"] = mesh.getNodeId();
     doc["msgType"] = "disarm_system_ack";
 

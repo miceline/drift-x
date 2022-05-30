@@ -23,7 +23,7 @@ void serialController(String incomingByte) {
   if (action == "arm") //{"action":"arm"}
   {
     StaticJsonDocument<200> doc;
-    doc["systemArmId"] = 345678;
+    doc["systemArmId"] = input["armId"];
     doc["action"] = "arm_system";
 
     String json_string;

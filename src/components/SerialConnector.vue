@@ -1,9 +1,72 @@
 <template>
   <v-row>
-    <v-col class="mb-5" cols="12">
+    <v-col class="mb-5" cols="5">
+      <v-row class="justify-left pl-2">
+        <div class="text-center">
+          Arm Id: {{this.armId}} |
+          Board Type: {{this.$parent.$data.boardType}} |
+          Board Version: {{this.$parent.$data.boardVersion}}
+
+        </div>
+      </v-row>
+      <v-row class="justify-left pl-2">
+        <div>Select race mode:
+          <select v-model="race.mode">
+            <option>---- Select Mode ----</option>
+            <option value="trail">Trail</option>
+            <option value="elimination">Elimination</option>
+        </select>
+        </div>
+        <div v-if="race.mode == 'elimination'">round#
+          <select v-model="race.round">
+            <option>---- Select Round ----</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+        </select>
+        </div>
+      </v-row>
+    </v-col>
+    <v-col class="mb-5" cols="7">
       <v-row class="justify-end">
         <div class="text-center">
-          {{this.boardType}} - {{this.boardVersion}}
+
+
+          <v-btn
+            class="ma-1"
+            :loading="loadingConnect"
+            :disabled="!(connected && !armState)"
+            color="success"
+            @click="arm"
+          >
+            Arm (F1)
+          </v-btn>
+
+          <v-btn
+            class="ma-1"
+            :loading="loadingConnect"
+            :disabled="!(connected && armState)"
+            color="warning"
+            @click="disarm"
+          >
+            Disarm (F2)
+          </v-btn>
+
+          <v-btn
+            class="ma-1"
+            :loading="loadingConnect"
+            :disabled="loadingConnect"
+            color="secondary"
+            @click="clearRun"
+          >
+            Clear Run (F3)
+          </v-btn>
+
           <v-btn
             class="ma-1 white--text"
             :loading="loadingConnect"
@@ -15,36 +78,6 @@
             <template v-slot:loader>
               <span>Connecting...</span>
             </template>
-          </v-btn>
-
-          <v-btn
-            class="ma-1"
-            :loading="loadingConnect"
-            :disabled="!connected"
-            color="secondary"
-            @click="arm"
-          >
-            Arm
-          </v-btn>
-
-          <v-btn
-            class="ma-1"
-            :loading="loadingConnect"
-            :disabled="!connected"
-            color="secondary"
-            @click="disarm"
-          >
-            Disarm
-          </v-btn>
-
-          <v-btn
-            class="ma-1"
-            :loading="loadingConnect"
-            :disabled="loadingConnect"
-            color="secondary"
-            @click="clearRun"
-          >
-            Clear Run
           </v-btn>
 
           <v-btn
@@ -74,11 +107,28 @@ export default {
   props: {
     msg: String,
   },
-  mounted: function () {},
+  mounted: function () {
+    this.$root.$on("scoreEvent", (data) => {
+      let finished = true;
+      for(const scoreNode of data)
+      {
+        if(!scoreNode.score)finished = false;
+      }
+      if(finished){
+        //stop timer
+        this.disarm();
+      }
+    });
+    //currentRuns
+  },
   data: function () {
     return {
-      boardType: 'aaa',
-      boardVersion: '',
+      race: {
+        mode: null,
+        round: 0,
+      },
+      armId: 0,
+      armState:false,
       readThread: null,
       connected: false,
       serial: {
@@ -98,6 +148,18 @@ export default {
       loadingConnect: false,
     };
   },
+  watch: {
+    race: {
+      handler(val){
+        //console.log('raceMode', val);
+        this.$root.$emit("raceMode", val);
+     },
+     deep: true
+    }
+  },
+  created: function() {
+    document.addEventListener('keyup', this.keyMonitor);
+  },
   computed: {
     isDisabled: function () {
       return !this.connected;
@@ -107,6 +169,16 @@ export default {
     }
   },
   methods: {
+    keyMonitor(event) {
+      //console.log('event.keyCode', event.keyCode);
+      if (event.keyCode === 112) {
+        this.arm();
+      }else if (event.keyCode === 113) {
+        this.disarm();
+      }else if (event.keyCode === 114) {
+        this.clearRun();
+      }
+    },
     read: function (reader) {
       reader.read()
       .then((data) => {
@@ -224,13 +296,26 @@ export default {
     },
     //{"action":"arm"}
     async arm() {
+      let armId = Math.floor(100000000 + Math.random() * 900000000);
       this.$root.$emit("runEvent", "clear");
-      var line = '{"action":"arm"}\n';
+      var line = `{"action":"arm", "armId":${armId}}\n`;
       await this.sendCommand(line);
+      this.armState = true;
+      this.armId = armId;
+      let obj = {
+        armId: armId,
+        armState: true,
+      }
+      this.$root.$emit("armEvent", obj);
     },
     async disarm() {
       var line = '{"action":"disarm"}\n';
       await this.sendCommand(line);
+      this.armState = false;
+      let obj = {
+        armState: false,
+      }
+      this.$root.$emit("armEvent", obj);
     },
     async ping() {
       this.$root.$emit("runEvent", "offlineDevices");

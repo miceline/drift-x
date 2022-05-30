@@ -10,24 +10,10 @@
     </v-col>
     <v-col class="mb-5" cols="12">
 
-      <v-row justify="start">
-        <v-col class="mb-5" cols="12">
-          <v-row justify="start">
-            <h2 class="headline font-weight-bold mb-3 pa-3">Scoring Logs</h2>
-          </v-row>
-          <v-row justify="start">
-            <v-data-table
-              :headers="headers"
-              :items="log"
-              :items-per-page="5"
-              class="elevation-1"
-            ></v-data-table>
-          </v-row>
-        </v-col>
-      </v-row>
+
 
       <v-row justify="start">
-        <h2 class="headline font-weight-bold mb-3 pa-3">Connected Nodes</h2>
+        <h2 class="headline font-weight-bold mb-3 pa-3">Connected Nodes ({{nodes.length}})</h2>
         <v-btn
           class="ma-1"
           color="secondary"
@@ -67,7 +53,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr class="background-color: primary">
+                      <!-- <tr class="background-color: primary">
                         <td class="white--text text--lighten-1">Run info</td>
                         <td></td>
                       </tr>
@@ -90,7 +76,7 @@
                       <tr>
                         <td>sample size</td>
                         <td>{{ item.sampleSize }}</td>
-                      </tr>
+                      </tr> -->
                       <tr class="background-color: primary">
                         <td class="white--text text--lighten-1">Node Info</td>
                         <td></td>
@@ -128,6 +114,22 @@
               <v-btn text color="primary accent-4"> Config Node </v-btn>
             </v-card-actions>
           </v-card>
+        </v-col>
+      </v-row>
+
+      <v-row justify="start">
+        <v-col class="mb-5" cols="12">
+          <v-row justify="start">
+            <h2 class="headline font-weight-bold mb-3 pa-3">Scoring Logs</h2>
+          </v-row>
+          <v-row justify="start">
+            <v-data-table
+              :headers="headers"
+              :items="log"
+              :items-per-page="5"
+              class="elevation-1"
+            ></v-data-table>
+          </v-row>
         </v-col>
       </v-row>
 
@@ -186,10 +188,10 @@ export default {
     return {
       headers: [
           {
-            text: 'Dessert (100g serving)',
+            text: 'nodeId',
             align: 'start',
             sortable: false,
-            value: 'name',
+            value: 'nodeId',
           },
           { text: 'Time', value: 'time' },
           { text: 'Score', value: 'score' },
@@ -200,6 +202,13 @@ export default {
       nodes: [],
       connected: false,
       log: [],
+      nodeConfig: [{
+        nodeId: 886187420,
+        nodeName: 'Enrick Device1',
+      },{
+        nodeId: 886192323,
+        nodeName: 'Enrick Device2',
+      }],
     };
   },
   methods: {
@@ -256,10 +265,11 @@ export default {
       }
       if (data.msgType == "scoring") {
         let node = this.nodes.find((node) => node.nodeId === data.nodeId);
+        console.log('scoring-find-node', node);
         let time = data.time;
         time = time.trim();
         node.online = true;
-        console.log('node.sampleSize',node.sampleSize);
+        //console.log('node.sampleSize',node.sampleSize);
         if(data.sampleSize > 6){
           //Thu Jan 1 00:26:30 1970
           if(node.score == null)
@@ -310,6 +320,8 @@ export default {
           if(node == null)
           {
             let nextNode = "node"  + (this.nodes.length +1);
+            let nodeInfo = this.nodeConfig.find((node) => node.nodeId == subNodeId);
+            if(nodeInfo) nextNode = nodeInfo.nodeName;
             this.nodes.push({
               online: false,
               nodeDate: "",
@@ -338,13 +350,15 @@ export default {
     },
     emitNewScore: function () {
       let scoreList = [];
-      for (let key in this.nodes) {
-        let node = this.nodes[key];
+      for (const node of this.nodes) {
+        //let node = this.nodes[key];
         scoreList.push({
-          id: node.name,
+          id: node.nodeId,
+          nodeDescription: node.name,
           date: node.runDate,
           time: node.runTime,
           score: node.score,
+          systemArmId: node.systemArmId,
         });
       }
 

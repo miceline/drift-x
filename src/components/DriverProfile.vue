@@ -287,7 +287,7 @@ export default {
            {
               throw new Error('Authentication please check api key...')
            }
-          response.json()
+          return response.json()
         })
         .then(data => {
           console.log(data);
@@ -319,7 +319,7 @@ export default {
 
           // This works, since wm refers to your view model.
           vm.modalVisible = false;
-        }, 3000); 
+        }, 3000);
 
         });
       },

@@ -128,15 +128,24 @@
         </v-col>
       </v-row>
     </v-col>
+    <Modal
+      v-show="modalVisible"
+    />
   </v-row>
+
 </template>
 
 <script>
 // const worker =
 //worker.postMessage('')
 
+import Modal from './Modal.vue';
+
 export default {
   name: "DriverProfile",
+  components: {
+      Modal,
+    },
   props: {
     msg: String,
   },
@@ -162,6 +171,7 @@ export default {
   },
   data: function () {
     return {
+      modalVisible: false,
       raceMode: {
         mode: null,
         round: null,
@@ -270,8 +280,15 @@ export default {
             'Authorization': `Token ${this.$root.$children[0].$data.apiKey}`,
           },
         };
+        var vm = this;
         fetch('https://api.baserow.io/api/database/rows/table/67752/?user_field_names=true&filter__field_402680__equal='+compNumber, requestOptions)
-        .then(response => response.json())
+        .then(response => {
+          if(response.status==401)
+           {
+              throw new Error('Authentication please check api key...')
+           }
+          response.json()
+        })
         .then(data => {
           console.log(data);
           if(data.count == 1)
@@ -289,6 +306,21 @@ export default {
             this.currentDriver.db_id = 0;
             this.registration = true;
           }
+        })
+        .catch(function(data)
+        {
+          console.log('error data',data);
+          console.log(this);
+          vm.modalVisible = true;
+
+          setTimeout(function() {
+          // This does not work, you need the outside context view model.
+          //this.sendButtonDisable = true;
+
+          // This works, since wm refers to your view model.
+          vm.modalVisible = false;
+        }, 3000); 
+
         });
       },
       updateDriver(){
